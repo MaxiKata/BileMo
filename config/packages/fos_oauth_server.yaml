@@ -10,3 +10,4 @@ fos_oauth_server:
       access_token_lifetime: 86400
       refresh_token_lifetime: 1209600
       auth_code_lifetime: 30
+      supported_scopes: ROLE_USER ROLE_ADMIN

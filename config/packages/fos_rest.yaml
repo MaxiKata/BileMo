@@ -18,6 +18,7 @@ fos_rest:
     rules:
       - { path: ^/api, prefer_extension: true, fallback_format: json, priorities: [ json, html ] }
       - { path: ^/createClient, prefer_extension: true, fallback_format: json, priorities: [ json, html ] }
+      - { path: ^/oauth/v2/token, prefer_extension: true, fallback_format: json, priorities: [ json, html ] }
 
   param_fetcher_listener:  force
   serializer:

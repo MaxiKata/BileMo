@@ -20,11 +20,36 @@ use Doctrine\ORM\Mapping as ORM;
 class Client extends BaseClient
 {
     /**
-     * @ORM\Id()
+     * @ORM\Id
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
 
+    /**
+     * @ORM\Column(type="string")
+     */
+    protected $randomId;
 
+    /**
+     * @ORM\Column(type="string")
+     */
+    protected $secret;
+
+    /**
+     * @ORM\Column(type="simple_array")
+     * @var array
+     */
+    protected $redirectUris = array();
+
+    /**
+     * @ORM\Column(type="simple_array")
+     * @var array
+     */
+    protected $allowedGrantTypes = array();
+
+    public function __construct()
+    {
+        parent::__construct();
+    }
 }
