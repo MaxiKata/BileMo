@@ -114,6 +114,9 @@
     "exsyst/swagger": {
         "version": "v0.4.1"
     },
+    "friendsofsymfony/oauth-server-bundle": {
+        "version": "1.6.2"
+    },
     "friendsofsymfony/oauth2-php": {
         "version": "1.2.3"
     },
@@ -133,7 +136,7 @@
         "version": "v2.1.2"
     },
     "guzzlehttp/guzzle": {
-        "version": "6.4.1"
+        "version": "6.5.0"
     },
     "guzzlehttp/promises": {
         "version": "v1.3.1"
@@ -640,7 +643,7 @@
         "version": "v1.3.2"
     },
     "willdurand/hateoas": {
-        "version": "3.4.0"
+        "version": "3.5.0"
     },
     "willdurand/hateoas-bundle": {
         "version": "2.0.1"
