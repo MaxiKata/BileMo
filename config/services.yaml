@@ -31,8 +31,5 @@ services:
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
 
-    sensio_framework_extra.view.listener:
-        alias: Sensio\Bundle\FrameworkExtraBundle\EventListener\TemplateListener
-
     FOS\OAuthServerBundle\Model\AccessTokenManagerInterface:
         alias: fos_oauth_server.access_token_manager.default

@@ -26,6 +26,9 @@ security:
             fos_oauth:  true
             stateless:  true
             anonymous:  false
+            guard:
+                authenticators:
+                    - App\Security\TokenAuthenticator
         main:
             pattern: ^/
             form_login:
