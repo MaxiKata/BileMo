@@ -15,7 +15,7 @@ use FOS\OAuthServerBundle\Model\Client as BaseClient;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Repository\ClientRepository")
  */
 class Client extends BaseClient
 {
@@ -47,6 +47,12 @@ class Client extends BaseClient
      * @var array
      */
     protected $allowedGrantTypes = array();
+
+    /**
+     * @ORM\Column(type="string")
+     * @var string
+     */
+    protected $name;
 
     public function __construct()
     {
