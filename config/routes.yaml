@@ -1,6 +1,10 @@
 index:
-    path: /createClient
-    controller: \App\Controller\SecurityController::AuthenticationAction
+  path: /createClient
+  controller: \App\Controller\SecurityController::AuthenticationAction
+
+register_user:
+  path: /login
+  controller: \App\Controller\UserController::registerAction
 
 fos_oauth_server_token:
   resource: "@FOSOAuthServerBundle/Resources/config/routing/token.xml"
