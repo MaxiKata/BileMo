@@ -6,8 +6,10 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Exception\ResourceValidationException;
+use App\Repository\ClientRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use FOS\OAuthServerBundle\Controller\TokenController;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,12 +20,16 @@ class UserController extends AbstractFOSRestController
     private $em;
     private $repository;
     private $encoder;
+    private $clientRepository;
+    private $tokenController;
 
-    public function __construct(EntityManagerInterface $em, UserRepository $repository, UserPasswordEncoderInterface $encoder)
+    public function __construct(EntityManagerInterface $em, UserRepository $repository, UserPasswordEncoderInterface $encoder, ClientRepository $clientRepository, TokenController $tokenController)
     {
         $this->em = $em;
         $this->repository = $repository;
         $this->encoder = $encoder;
+        $this->clientRepository = $clientRepository;
+        $this->tokenController = $tokenController;
     }
 
     /**
@@ -34,6 +40,7 @@ class UserController extends AbstractFOSRestController
      *
      * @Rest\View()
      * @param Request $request
+     * @return
      * @throws ResourceValidationException
      */
     public function registerAction(Request $request)
@@ -41,11 +48,13 @@ class UserController extends AbstractFOSRestController
         $data = json_decode($request->getContent(), true);
 
         if(empty($data['username']) || !$data['username']){
-            throw new ResourceValidationException('Username missing', 303);
+            throw new ResourceValidationException('username missing', 303);
         }elseif (empty($data['email']) || !$data['email']){
-            throw new ResourceValidationException('Email missing', 303);
+            throw new ResourceValidationException('email missing', 303);
         }elseif (empty($data['password']) || !$data['password']){
-            throw new ResourceValidationException('Password missing', 303);
+            throw new ResourceValidationException('password missing', 303);
+        }elseif (empty($data['clientName']) || !$data['clientName']){
+            throw new ResourceValidationException('clientName missing', 303);
         }
 
         $result = $this->register(
@@ -54,7 +63,24 @@ class UserController extends AbstractFOSRestController
             $data['password']
         );
         if($result){
-            throw new ResourceValidationException('User has been well created', 201);
+            $client = $this->clientRepository->findOneBy(['name' => $data['clientName']]);
+            $request = Request::create(
+                json_encode($request->query->all()),
+                'POST',
+                ['Content-Type' => 'application/json',
+                'client_id' => $client->getPublicId(),
+                'client_secret'=>$client->getSecret(),
+                'grant_type' => 'password',
+                'username' => $data['username'],
+                'password' => $data['password'],
+                'scope' => 'ROLE_USER'
+                ],
+                $request->cookies->all(),
+                $request->files->all(),
+                $request->server->all(),
+                ''
+            );
+            return $this->tokenController->tokenAction($request);
         }else{
             throw new ResourceValidationException('User Already exists', 403);
         }
