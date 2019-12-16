@@ -51,10 +51,17 @@ class UserController extends AbstractFOSRestController
      * )
      * @Rest\View()
      * @param User $user
+     * @param Request $request
      * @return User
+     * @throws ResourceValidationException
      */
-    public function getUserAction(User $user){
-        return $user;
+    public function getUserAction(User $user, Request $request){
+        $token = filter_var($request->headers->get('X-AUTH-TOKEN'), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $result = $this->accessTokenRepository->findOneBy(['token' => $token]);
+        if($result && $result->getClient() === $user->getClient()){
+            return $user;
+        }
+        throw new ResourceValidationException('You are not allowed to see this User');
     }
 
     /**
@@ -139,7 +146,7 @@ class UserController extends AbstractFOSRestController
             );
             return $this->tokenController->tokenAction($request);
         }else{
-            throw new ResourceValidationException('User already exits but password is wrong');
+            throw new ResourceValidationException('User already exits or password is wrong');
         }
     }
 
@@ -209,16 +216,28 @@ class UserController extends AbstractFOSRestController
     {
         $email_exist = $this->repository->findOneBy(['email' => $email]);
         $username_exist = $this->repository->findOneBy(['email' => $username]);
-
+        $checkUser = $this->repository->findOneBy(['client' =>$client, 'username'=> $username, 'email' => $email]);
+        if($checkUser){
+            if(!$this->encoder->isPasswordValid($checkUser, $password)){
+                return false;
+            }
+            return true;
+        }
         if($email_exist){
             if(!$this->encoder->isPasswordValid($email_exist, $password)){
                 return false;
             }
+            $email_exist->setClient($client);
+            $this->em->persist($email_exist);
+            $this->em->flush();
             return true;
         }elseif ($username_exist){
             if(!$this->encoder->isPasswordValid($username_exist, $password)){
                 return false;
             }
+            $username_exist->setClient($client);
+            $this->em->persist($username_exist);
+            $this->em->flush();
             return true;
         }
 
