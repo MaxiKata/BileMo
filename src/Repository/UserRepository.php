@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Client;
 use App\Entity\User;
 use App\Exception\ResourceValidationException;
 use Doctrine\Common\Persistence\ManagerRegistry;
@@ -11,6 +12,7 @@ use Pagerfanta\Pagerfanta;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use function Doctrine\ORM\QueryBuilder;
 
 /**
  * @method User|null find($id, $lockMode = null, $lockVersion = null)
@@ -60,11 +62,10 @@ class UserRepository extends AbstractRepository implements PasswordUpgraderInter
         ;
         if($term){
             $qb
-                ->where('a.username LIKE? 1')
-                ->setParameter(1, '%' . $term . '%')
+                ->where("a.client = :client")
+                ->setParameter(':client', $term->getId())
             ;
         }
-
         $paginate = $this->paginate($qb, $limit, $offset);
         /* check if result have been found */
         if(empty($paginate->getNbResults())){
