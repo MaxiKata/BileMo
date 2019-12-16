@@ -10,9 +10,11 @@ use App\Repository\ClientRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use FOS\OAuthServerBundle\Controller\TokenController;
+use FOS\OAuthServerBundle\Model\ClientManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class UserController extends AbstractFOSRestController
@@ -22,14 +24,16 @@ class UserController extends AbstractFOSRestController
     private $encoder;
     private $clientRepository;
     private $tokenController;
+    private $clientManager;
 
-    public function __construct(EntityManagerInterface $em, UserRepository $repository, UserPasswordEncoderInterface $encoder, ClientRepository $clientRepository, TokenController $tokenController)
+    public function __construct(EntityManagerInterface $em, UserRepository $repository, UserPasswordEncoderInterface $encoder, ClientRepository $clientRepository, TokenController $tokenController, ClientManagerInterface $clientManager)
     {
         $this->em = $em;
         $this->repository = $repository;
         $this->encoder = $encoder;
         $this->clientRepository = $clientRepository;
         $this->tokenController = $tokenController;
+        $this->clientManager = $clientManager;
     }
 
     /**
@@ -40,7 +44,7 @@ class UserController extends AbstractFOSRestController
      *
      * @Rest\View()
      * @param Request $request
-     * @return
+     * @return Response
      * @throws ResourceValidationException
      */
     public function registerAction(Request $request)
@@ -53,17 +57,26 @@ class UserController extends AbstractFOSRestController
             throw new ResourceValidationException('email missing', 303);
         }elseif (empty($data['password']) || !$data['password']){
             throw new ResourceValidationException('password missing', 303);
-        }elseif (empty($data['clientName']) || !$data['clientName']){
-            throw new ResourceValidationException('clientName missing', 303);
+        }elseif (empty($data['client_id']) || !isset($data['client_id']) || empty($data['client_secret']) || !isset($data['client_secret'])){
+            if (empty($data['clientName']) || !isset($data['clientName'])){
+                throw new ResourceValidationException('client_id, client_secret or clientName missing', 303);
+            }
         }
-
         $result = $this->register(
             $data['username'],
             $data['email'],
             $data['password']
         );
         if($result){
-            $client = $this->clientRepository->findOneBy(['name' => $data['clientName']]);
+
+            if (isset($data['client_id']) && isset($data['client_secret'])){
+                $client = $this->clientManager->findClientByPublicId($data['client_id']);
+                if($client->getSecret() != $data['client_secret']){
+                    throw new ResourceValidationException('Client identification incorect');
+                }
+            }elseif($data['clientName']){
+                $client = $this->clientRepository->findOneBy(['name' => $data['clientName']]);
+            }
             $request = Request::create(
                 json_encode($request->query->all()),
                 'POST',
