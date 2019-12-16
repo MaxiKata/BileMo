@@ -95,7 +95,7 @@ class UserController extends AbstractFOSRestController
             );
             return $this->tokenController->tokenAction($request);
         }else{
-            throw new ResourceValidationException('User Already exists', 403);
+            throw new ResourceValidationException('User already exits but password is wrong');
         }
     }
 
@@ -110,8 +110,16 @@ class UserController extends AbstractFOSRestController
         $email_exist = $this->repository->findOneBy(['email' => $email]);
         $username_exist = $this->repository->findOneBy(['email' => $username]);
 
-        if($email_exist || $username_exist){
-            return false;
+        if($email_exist){
+            if(!$this->encoder->isPasswordValid($email_exist, $password)){
+                return false;
+            }
+            return true;
+        }elseif ($username_exist){
+            if(!$this->encoder->isPasswordValid($username_exist, $password)){
+                return false;
+            }
+            return true;
         }
 
         $user = new User();
