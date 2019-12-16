@@ -4,6 +4,7 @@
 namespace App\Controller;
 
 
+use App\Entity\Client;
 use App\Entity\User;
 use App\Exception\ResourceValidationException;
 use App\Repository\AccessTokenRepository;
@@ -104,21 +105,22 @@ class UserController extends AbstractFOSRestController
                 throw new ResourceValidationException('client_id, client_secret or clientName missing', 303);
             }
         }
+        if (isset($data['client_id']) && isset($data['client_secret'])){
+            $client = $this->clientManager->findClientByPublicId($data['client_id']);
+            if($client->getSecret() != $data['client_secret']){
+                throw new ResourceValidationException('Client identification incorrect');
+            }
+        }elseif($data['clientName']){
+            $client = $this->clientRepository->findOneBy(['name' => $data['clientName']]);
+        }
+
         $result = $this->register(
             $data['username'],
             $data['email'],
-            $data['password']
+            $data['password'],
+            $client
         );
         if($result){
-
-            if (isset($data['client_id']) && isset($data['client_secret'])){
-                $client = $this->clientManager->findClientByPublicId($data['client_id']);
-                if($client->getSecret() != $data['client_secret']){
-                    throw new ResourceValidationException('Client identification incorrect');
-                }
-            }elseif($data['clientName']){
-                $client = $this->clientRepository->findOneBy(['name' => $data['clientName']]);
-            }
             $request = Request::create(
                 json_encode($request->query->all()),
                 'POST',
@@ -143,13 +145,15 @@ class UserController extends AbstractFOSRestController
 
     /**
      * @Rest\Get(
-     *     path="/users",
-     *     name="users_list"
+     *     path="/users/{id}",
+     *     name="users_list",
+     *     requirements={"id"="\d+"}
      * )
      *
      * @Rest\QueryParam(
      *     name="keyword",
      *     requirements="[a-zA-Z0-9]",
+     *     default="{id}",
      *     nullable=true,
      *     description="The keyword to search for."
      * )
@@ -172,28 +176,36 @@ class UserController extends AbstractFOSRestController
      *     description="The pagination offset"
      * )
      * @Rest\View()
+     * @param Client $client
+     * @param Request $request
      * @param ParamFetcherInterface $paramFetcher
      * @return Users
      * @throws ResourceValidationException
      */
-    public function getUsersAction(ParamFetcherInterface $paramFetcher)
+    public function getUsersAction(Client $client, Request $request, ParamFetcherInterface $paramFetcher)
     {
-        $pager = $this->repository->search(
-            $paramFetcher->get('keyword'),
-            $paramFetcher->get('order'),
-            $paramFetcher->get('limit'),
-            $paramFetcher->get('offset')
-        );
-        return new Users($pager);
+        $token = filter_var($request->headers->get('X-AUTH-TOKEN'), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $result = $this->accessTokenRepository->findOneBy(['token' => $token]);
+        if($result && $result->getClient() == $client){
+            $pager = $this->repository->search(
+                $client,
+                $paramFetcher->get('order'),
+                $paramFetcher->get('limit'),
+                $paramFetcher->get('offset')
+            );
+            return new Users($pager);
+        }
+        throw new ResourceValidationException('You don\'t have the credentials to access to this client');
     }
 
     /**
      * @param $username
      * @param $email
      * @param $password
+     * @param $client
      * @return bool
      */
-    private function register($username, $email, $password)
+    private function register($username, $email, $password, $client)
     {
         $email_exist = $this->repository->findOneBy(['email' => $email]);
         $username_exist = $this->repository->findOneBy(['email' => $username]);
@@ -217,6 +229,7 @@ class UserController extends AbstractFOSRestController
         $user->setEnabled(1);
         $user->setPassword($this->encoder->encodePassword($user, $password));
         $user->addRole("ROLE_ADMIN");
+        $user->setClient($client);
 
         $this->em->persist($user);
         $this->em->flush();
