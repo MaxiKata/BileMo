@@ -123,12 +123,12 @@ class UserController extends AbstractFOSRestController
                 json_encode($request->query->all()),
                 'POST',
                 ['Content-Type' => 'application/json',
-                'client_id' => $client->getPublicId(),
-                'client_secret'=>$client->getSecret(),
-                'grant_type' => 'password',
-                'username' => $data['username'],
-                'password' => $data['password'],
-                'scope' => 'ROLE_USER'
+                    'client_id' => $client->getPublicId(),
+                    'client_secret'=>$client->getSecret(),
+                    'grant_type' => 'password',
+                    'username' => $data['username'],
+                    'password' => $data['password'],
+                    'scope' => 'ROLE_USER'
                 ],
                 $request->cookies->all(),
                 $request->files->all(),
