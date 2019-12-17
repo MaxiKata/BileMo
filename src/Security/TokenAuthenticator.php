@@ -5,12 +5,12 @@ namespace App\Security;
 
 
 use App\Entity\AccessToken;
-use App\Exception\ResourceValidationException;
 use App\Repository\AccessTokenRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -66,7 +66,6 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
 
     /**
      * @inheritDoc
-     * @throws ResourceValidationException
      */
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
@@ -77,7 +76,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
         }
 
         if(null === $this->em->getRepository(AccessToken::class)->findOneBy(['token' => $token])){
-            throw new ResourceValidationException('Credential token is not valid');
+            throw new HttpException(Response::HTTP_BAD_REQUEST,'Credential token is not valid');
         }
 
         return $this->em->getRepository(AccessToken::class)

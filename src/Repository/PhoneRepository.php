@@ -3,10 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\Phone;
-use App\Exception\ResourceValidationException;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use FOS\RestBundle\Controller\Annotations as Rest;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Pagerfanta\Pagerfanta;
+
 
 /**
  * @method Phone|null find($id, $lockMode = null, $lockVersion = null)
@@ -26,8 +26,8 @@ class PhoneRepository extends AbstractRepository
      * @param string $order
      * @param int $limit
      * @param int $offset
-     * @return Pagerfanta
-     * @throws ResourceValidationException
+     * @return Pagerfanta | bool
+     * @Rest\View()
      */
     public function search($term, $order = 'asc', $limit = 20, $offset = 0)
     {
@@ -46,9 +46,8 @@ class PhoneRepository extends AbstractRepository
         $paginate = $this->paginate($qb, $limit, $offset);
         /* check if result have been found */
         if(empty($paginate->getNbResults())){
-            $message = 'There is no Phone founded';
-            $code = 204;
-            throw new ResourceValidationException($message, $code);
+            return false;
+
         }
 
         return $this->paginate($qb, $limit, $offset);

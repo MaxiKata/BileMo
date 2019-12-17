@@ -8,8 +8,6 @@ fos_rest:
     #    routing_loader: true
   exception:
     enabled: true
-    codes:
-      { App\Exception\ResourceValidationException: 400, \Exception: 500 }
   #        codes:
   #            App\Exception\MyException: 403
   #        messages:

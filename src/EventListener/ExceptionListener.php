@@ -14,10 +14,17 @@ class ExceptionListener
 
         // You get the exception object from the received event
         $exception = $event->getThrowable();
+        if(!$exception->getCode() && $exception instanceof HttpExceptionInterface){
+            $code = $exception->getStatusCode();
+        }elseif(!$exception->getCode()) {
+            $code = Response::HTTP_INTERNAL_SERVER_ERROR;
+        }else{
+            $code = $exception->getCode();
+        }
         $message = sprintf(
             "My Error says: \"%s\" with code: %s",
             $exception->getMessage(),
-            $exception->getCode()
+            $code
         );
         // Customize your response object to display the exception details
         $response = new Response();

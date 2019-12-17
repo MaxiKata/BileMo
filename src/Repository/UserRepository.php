@@ -2,13 +2,13 @@
 
 namespace App\Repository;
 
-use App\Entity\Client;
 use App\Entity\User;
-use App\Exception\ResourceValidationException;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Pagerfanta\Pagerfanta;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -51,7 +51,6 @@ class UserRepository extends AbstractRepository implements PasswordUpgraderInter
      * @param int $limit
      * @param int $offset
      * @return Pagerfanta
-     * @throws ResourceValidationException
      */
     public function search($term, $order = 'asc', $limit = 20, $offset = 0)
     {
@@ -71,7 +70,7 @@ class UserRepository extends AbstractRepository implements PasswordUpgraderInter
         if(empty($paginate->getNbResults())){
             $message = 'There is no Phone founded';
             $code = 204;
-            throw new ResourceValidationException($message, $code);
+            throw new HttpException(Response::HTTP_NO_CONTENT, $message);
         }
 
         return $this->paginate($qb, $limit, $offset);
