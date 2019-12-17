@@ -32,7 +32,15 @@ class UserController extends AbstractFOSRestController
     private $clientManager;
     private $accessTokenRepository;
 
-    public function __construct(EntityManagerInterface $em, UserRepository $repository, UserPasswordEncoderInterface $encoder, ClientRepository $clientRepository, TokenController $tokenController, ClientManagerInterface $clientManager, AccessTokenRepository $accessTokenRepository)
+    public function __construct(
+        EntityManagerInterface $em,
+        UserRepository $repository,
+        UserPasswordEncoderInterface $encoder,
+        ClientRepository $clientRepository,
+        TokenController $tokenController,
+        ClientManagerInterface $clientManager,
+        AccessTokenRepository $accessTokenRepository
+    )
     {
         $this->em = $em;
         $this->repository = $repository;
