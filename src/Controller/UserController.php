@@ -6,7 +6,6 @@ namespace App\Controller;
 
 use App\Entity\Client;
 use App\Entity\User;
-use App\Exception\ResourceValidationException;
 use App\Repository\AccessTokenRepository;
 use App\Repository\ClientRepository;
 use App\Repository\UserRepository;
@@ -20,6 +19,7 @@ use FOS\RestBundle\Request\ParamFetcherInterface;
 use FOS\RestBundle\View\View;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class UserController extends AbstractFOSRestController
@@ -61,7 +61,6 @@ class UserController extends AbstractFOSRestController
      * @param User $user
      * @param Request $request
      * @return User
-     * @throws ResourceValidationException
      */
     public function getUserAction(User $user, Request $request){
         $token = filter_var($request->headers->get('X-AUTH-TOKEN'), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
@@ -69,29 +68,29 @@ class UserController extends AbstractFOSRestController
         if($result && $result->getClient() === $user->getClient()){
             return $user;
         }
-        throw new ResourceValidationException('You are not allowed to see this User');
+        throw new HttpException(Response::HTTP_FORBIDDEN,'You are not allowed to see this User');
     }
 
     /**
      * @Rest\Delete(
      *     path="user/{id}",
-     *     name="delte_user",
+     *     name="delete_user",
      *     requirements={"id"="\d+"}
      * )
      * @param User $user
      * @param Request $request
      * @return View
-     * @throws ResourceValidationException
      */
     public function deleteUserAction(User $user, Request $request){
         $token = filter_var($request->headers->get('X-AUTH-TOKEN'), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $result = $this->accessTokenRepository->findOneBy(['token' => $token]);
+
         if($result && $result->getUser() === $user){
             $this->em->remove($user);
             $this->em->flush();
             return $this->view('null', Response::HTTP_NO_CONTENT);
         }
-        throw new ResourceValidationException('You can only delete your own account');
+        throw new HttpException(Response::HTTP_FORBIDDEN, 'You can only delete your own account');
     }
 
     /**
@@ -103,27 +102,26 @@ class UserController extends AbstractFOSRestController
      * @Rest\View()
      * @param Request $request
      * @return Response
-     * @throws ResourceValidationException
      */
     public function registerAction(Request $request)
     {
         $data = json_decode($request->getContent(), true);
 
         if(empty($data['username']) || !$data['username']){
-            throw new ResourceValidationException('username missing', 303);
+            throw new HttpException(Response::HTTP_BAD_REQUEST,'Username missing');
         }elseif (empty($data['email']) || !$data['email']){
-            throw new ResourceValidationException('email missing', 303);
+            throw new HttpException(Response::HTTP_BAD_REQUEST,'Email missing');
         }elseif (empty($data['password']) || !$data['password']){
-            throw new ResourceValidationException('password missing', 303);
+            throw new HttpException(Response::HTTP_BAD_REQUEST,'Password missing');
         }elseif (empty($data['client_id']) || !isset($data['client_id']) || empty($data['client_secret']) || !isset($data['client_secret'])){
             if (empty($data['clientName']) || !isset($data['clientName'])){
-                throw new ResourceValidationException('client_id, client_secret or clientName missing', 303);
+                throw new HttpException(Response::HTTP_UNPROCESSABLE_ENTITY, 'client_id, client_secret or clientName missing');
             }
         }
         if (isset($data['client_id']) && isset($data['client_secret'])){
             $client = $this->clientManager->findClientByPublicId($data['client_id']);
             if($client->getSecret() != $data['client_secret']){
-                throw new ResourceValidationException('Client identification incorrect');
+                throw new HttpException(Response::HTTP_BAD_REQUEST, 'Client identification incorrect');
             }
         }elseif($data['clientName']){
             $client = $this->clientRepository->findOneBy(['name' => $data['clientName']]);
@@ -154,7 +152,7 @@ class UserController extends AbstractFOSRestController
             );
             return $this->tokenController->tokenAction($request);
         }else{
-            throw new ResourceValidationException('User already exits or password is wrong');
+            throw new HttpException(Response::HTTP_BAD_REQUEST,'User already exits or password is wrong');
         }
     }
 
@@ -195,7 +193,6 @@ class UserController extends AbstractFOSRestController
      * @param Request $request
      * @param ParamFetcherInterface $paramFetcher
      * @return Users
-     * @throws ResourceValidationException
      */
     public function getUsersAction(Client $client, Request $request, ParamFetcherInterface $paramFetcher)
     {
@@ -210,7 +207,7 @@ class UserController extends AbstractFOSRestController
             );
             return new Users($pager);
         }
-        throw new ResourceValidationException('You don\'t have the credentials to access to this client');
+        throw new HttpException(Response::HTTP_FORBIDDEN,'You don\'t have the credentials to access to this client');
     }
 
     /**
