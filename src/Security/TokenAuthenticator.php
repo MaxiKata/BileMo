@@ -79,6 +79,11 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
             throw new HttpException(Response::HTTP_BAD_REQUEST,'Credential token is not valid');
         }
 
+        if($this->em->getRepository(AccessToken::class)
+            ->findOneBy(['token' => $token])->getExpiresAt() <= time()){
+            throw new HttpException(Response::HTTP_FORBIDDEN, 'Token Expired, please login again');
+        }
+
         return $this->em->getRepository(AccessToken::class)
             ->findOneBy(['token' => $token])->getUser();
     }
