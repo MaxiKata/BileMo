@@ -8,6 +8,7 @@ use App\Entity\Client;
 use App\Entity\User;
 use App\Repository\AccessTokenRepository;
 use App\Repository\ClientRepository;
+use App\Repository\RefreshTokenRepository;
 use App\Repository\UserRepository;
 use App\Representation\Users;
 use Doctrine\ORM\EntityManagerInterface;
@@ -17,6 +18,7 @@ use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcherInterface;
 use FOS\RestBundle\View\View;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -31,6 +33,7 @@ class UserController extends AbstractFOSRestController
     private $tokenController;
     private $clientManager;
     private $accessTokenRepository;
+    private $refreshTokenRepository;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -39,7 +42,8 @@ class UserController extends AbstractFOSRestController
         ClientRepository $clientRepository,
         TokenController $tokenController,
         ClientManagerInterface $clientManager,
-        AccessTokenRepository $accessTokenRepository
+        AccessTokenRepository $accessTokenRepository,
+        RefreshTokenRepository $refreshTokenRepository
     )
     {
         $this->em = $em;
@@ -49,6 +53,7 @@ class UserController extends AbstractFOSRestController
         $this->tokenController = $tokenController;
         $this->clientManager = $clientManager;
         $this->accessTokenRepository = $accessTokenRepository;
+        $this->refreshTokenRepository = $refreshTokenRepository;
     }
 
     /**
@@ -91,69 +96,6 @@ class UserController extends AbstractFOSRestController
             return $this->view('null', Response::HTTP_NO_CONTENT);
         }
         throw new HttpException(Response::HTTP_FORBIDDEN, 'You can only delete your own account');
-    }
-
-    /**
-     * @Rest\Post(
-     *     path="/login",
-     *     name="login_user"
-     * )
-     *
-     * @Rest\View()
-     * @param Request $request
-     * @return Response
-     */
-    public function registerAction(Request $request)
-    {
-        $data = json_decode($request->getContent(), true);
-
-        if(empty($data['username']) || !$data['username']){
-            throw new HttpException(Response::HTTP_BAD_REQUEST,'Username missing');
-        }elseif (empty($data['email']) || !$data['email']){
-            throw new HttpException(Response::HTTP_BAD_REQUEST,'Email missing');
-        }elseif (empty($data['password']) || !$data['password']){
-            throw new HttpException(Response::HTTP_BAD_REQUEST,'Password missing');
-        }elseif (empty($data['client_id']) || !isset($data['client_id']) || empty($data['client_secret']) || !isset($data['client_secret'])){
-            if (empty($data['clientName']) || !isset($data['clientName'])){
-                throw new HttpException(Response::HTTP_UNPROCESSABLE_ENTITY, 'client_id, client_secret or clientName missing');
-            }
-        }
-        if (isset($data['client_id']) && isset($data['client_secret'])){
-            $client = $this->clientManager->findClientByPublicId($data['client_id']);
-            if($client->getSecret() != $data['client_secret']){
-                throw new HttpException(Response::HTTP_BAD_REQUEST, 'Client identification incorrect');
-            }
-        }elseif($data['clientName']){
-            $client = $this->clientRepository->findOneBy(['name' => $data['clientName']]);
-        }
-
-        $result = $this->register(
-            $data['username'],
-            $data['email'],
-            $data['password'],
-            $client
-        );
-        if($result){
-            $request = Request::create(
-                json_encode($request->query->all()),
-                'POST',
-                ['Content-Type' => 'application/json',
-                    'client_id' => $client->getPublicId(),
-                    'client_secret'=>$client->getSecret(),
-                    'grant_type' => 'password',
-                    'username' => $data['username'],
-                    'password' => $data['password'],
-                    'scope' => 'ROLE_USER'
-                ],
-                $request->cookies->all(),
-                $request->files->all(),
-                $request->server->all(),
-                ''
-            );
-            return $this->tokenController->tokenAction($request);
-        }else{
-            throw new HttpException(Response::HTTP_BAD_REQUEST,'User already exits or password is wrong');
-        }
     }
 
     /**
@@ -211,13 +153,109 @@ class UserController extends AbstractFOSRestController
     }
 
     /**
+     * @Rest\Post(
+     *     path="/login",
+     *     name="login_user"
+     * )
+     *
+     * @Rest\View()
+     * @param Request $request
+     * @return Response
+     */
+    public function registerAction(Request $request)
+    {
+        $data = json_decode($request->getContent(), true);
+        $token = null;
+
+        if(empty($data['username']) || !$data['username']){
+            throw new HttpException(Response::HTTP_BAD_REQUEST,'Username missing');
+        }elseif (empty($data['email']) || !$data['email']){
+            throw new HttpException(Response::HTTP_BAD_REQUEST,'Email missing');
+        }elseif (empty($data['password']) || !$data['password']){
+            throw new HttpException(Response::HTTP_BAD_REQUEST,'Password missing');
+        }elseif (empty($data['client_id']) || !isset($data['client_id']) || empty($data['client_secret']) || !isset($data['client_secret'])){
+            if (empty($data['clientName']) || !isset($data['clientName'])){
+                throw new HttpException(Response::HTTP_UNPROCESSABLE_ENTITY, 'client_id, client_secret or clientName missing');
+            }
+        }
+        if (isset($data['client_id']) && isset($data['client_secret'])){
+            $client = $this->clientManager->findClientByPublicId($data['client_id']);
+            if($client->getSecret() != $data['client_secret']){
+                throw new HttpException(Response::HTTP_BAD_REQUEST, 'Client identification incorrect');
+            }
+        }elseif($data['clientName']){
+            $client = $this->clientRepository->findOneBy(['name' => $data['clientName']]);
+        }
+
+        $result = $this->register(
+            $data['username'],
+            $data['email'],
+            $data['password'],
+            $client,
+            $token
+        );
+
+        if($result){
+            if(is_string($result)){
+                $accessToken = $this->accessTokenRepository->findOneBy(['token' => $result]);
+                $refreshToken = $this->refreshTokenRepository->findOneBy([
+                    'id' => $accessToken->getId(),
+                    'user' => $accessToken->getUser()
+                ]);
+                if ($accessToken->getExpiresAt() >= time()){
+                    return new JsonResponse([
+                        'access_token'  =>  $accessToken->getToken(),
+                        'expires_in'    =>  $accessToken->getExpiresIn(),
+                        'token_type'    =>  'bearer',
+                        'scope'         =>  $accessToken->getScope(),
+                        'refresh_token' =>  $refreshToken->getToken()
+                    ]);
+                }
+                $this->em->remove($accessToken);
+                $this->em->remove($refreshToken);
+                $this->em->flush();
+            }
+            $request = Request::create(
+                json_encode($request->query->all()),
+                'POST',
+                ['Content-Type'     =>  'application/json',
+                    'client_id'     =>  $client->getPublicId(),
+                    'client_secret' =>  $client->getSecret(),
+                    'grant_type'    =>  'password',
+                    'username'      =>  $data['username'],
+                    'password'      =>  $data['password'],
+                    'scope'         =>  'ROLE_USER'
+                ],
+                $request->cookies->all(),
+                $request->files->all(),
+                $request->server->all(),
+                ''
+            );
+            $view = $this->tokenController->tokenAction($request);
+            $token = $this->updateToken($view);
+
+            $this->register(
+                $data['username'],
+                $data['email'],
+                $data['password'],
+                $client,
+                $token
+            );
+            return $view;
+        }else{
+            throw new HttpException(Response::HTTP_BAD_REQUEST,'User already exits or password is wrong');
+        }
+    }
+
+    /**
      * @param $username
      * @param $email
      * @param $password
      * @param $client
+     * @param $token
      * @return bool
      */
-    private function register($username, $email, $password, $client)
+    private function register($username, $email, $password, $client, $token)
     {
         $email_exist = $this->repository->findOneBy(['email' => $email]);
         $username_exist = $this->repository->findOneBy(['email' => $username]);
@@ -225,25 +263,25 @@ class UserController extends AbstractFOSRestController
         if($checkUser){
             if(!$this->encoder->isPasswordValid($checkUser, $password)){
                 return false;
+            }elseif ($token){
+                $this->updateUser($checkUser, $token);
             }
-            return true;
+            return $checkUser->getConfirmationToken();
         }
         if($email_exist){
             if(!$this->encoder->isPasswordValid($email_exist, $password)){
                 return false;
             }
             $email_exist->setClient($client);
-            $this->em->persist($email_exist);
-            $this->em->flush();
-            return true;
+            $this->updateUser($email_exist, $token);
+            return $email_exist->getConfirmationToken();
         }elseif ($username_exist){
             if(!$this->encoder->isPasswordValid($username_exist, $password)){
                 return false;
             }
             $username_exist->setClient($client);
-            $this->em->persist($username_exist);
-            $this->em->flush();
-            return true;
+            $this->updateUser($username_exist, $token);
+            return $username_exist->getConfirmationToken();
         }
 
         $user = new User();
@@ -254,10 +292,30 @@ class UserController extends AbstractFOSRestController
         $user->setPassword($this->encoder->encodePassword($user, $password));
         $user->addRole("ROLE_ADMIN");
         $user->setClient($client);
-
-        $this->em->persist($user);
-        $this->em->flush();
+        $this->updateUser($user, $token);
 
         return true;
+    }
+
+    private function updateToken($view)
+    {
+        $finalArray= [];
+        $viewContent = str_replace('"','', $view->getContent());
+        $viewContent = ltrim($viewContent, '{');
+        $viewContent = rtrim($viewContent, '}');
+
+        $asArr = explode(',', $viewContent);
+        foreach ($asArr as $value){
+            $tmp = explode(':', $value);
+            $finalArray[ $tmp[0] ] = $tmp[1];
+        }
+        return $finalArray['access_token'];
+    }
+
+    private function updateUser(User $user, $token)
+    {
+        $user->setConfirmationToken($token);
+        $this->em->persist($user);
+        $this->em->flush();
     }
 }

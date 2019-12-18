@@ -31,7 +31,7 @@ class AccessToken extends BaseAccessToken
      */
     protected $client;
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\User", cascade={"remove"})
+     * @ORM\ManyToOne(targetEntity="App\Entity\User")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
      */
     protected $user;

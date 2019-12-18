@@ -15,7 +15,7 @@ use Doctrine\ORM\Mapping as ORM;
 use FOS\OAuthServerBundle\Model\RefreshToken as BaseRefreshToken;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Repository\RefreshTokenRepository")
  */
 class RefreshToken extends BaseRefreshToken
 {
@@ -31,7 +31,7 @@ class RefreshToken extends BaseRefreshToken
      */
     protected $client;
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\User", cascade={"remove"})
+     * @ORM\ManyToOne(targetEntity="App\Entity\User")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
      */
     protected $user;
