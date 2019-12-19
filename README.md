@@ -29,7 +29,7 @@ Project made with Symfony 4.4.
 
 **=>** A property "name" has been added on the basic settings for the Client Entity. You might need to add it to few files in composer such as:
 
--  FOS\OAuthServerBundle\Model\Client with: 
+-   FOS\OAuthServerBundle\Model\Client with: 
 
 ```
     /**
@@ -40,7 +40,7 @@ Project made with Symfony 4.4.
     protected $name;
 ```
 
--  FOS\OAuthServerBundle\Model\ClientInterface with:
+-   FOS\OAuthServerBundle\Model\ClientInterface with:
 
 ```
     /**
@@ -58,7 +58,7 @@ Project made with Symfony 4.4.
 
 **=>** You might wish to hide some params from being shown to user or client when they call a user or users list. In this case, you can add:
 
--  Comment the entity with (this will hide and protect all properties):
+-   Comment the entity with (this will hide and protect all properties):
 
 ```
     /**
@@ -66,7 +66,7 @@ Project made with Symfony 4.4.
     */
 ```
 
--  Comment the property you wish to show with:
+-   Comment the property you wish to show with:
 
 ```
     /**
@@ -80,12 +80,12 @@ You can easily manage the authorization in config/packages/security.yaml and set
 
 **We strongly recommend to put back the basic settings once 1st Client will be created**
     
--  To add a new Client call: *api/admin/createClient*
--  To connect as user: *api/login*
+-   To add a new Client call: *api/admin/createClient*
+-   To connect as user: *api/login*
 
 Once logged in, the API will send back a token that you will be required for every connection and should be sent in headers as:
--  Key = ```X-AUTH-TOKEN```
--  Value = *User token*
+-   Key = ```X-AUTH-TOKEN```
+-   Value = *User token*
 
 The address that user can check are:
 
