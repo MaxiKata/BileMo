@@ -19,6 +19,10 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\ConstraintViolationList;
 
+/**
+ * Class PhoneController
+ * @package App\Controller
+ */
 class PhoneController extends AbstractFOSRestController
 {
     /**
@@ -31,8 +35,17 @@ class PhoneController extends AbstractFOSRestController
      */
     private $repository;
 
+    /**
+     * @var SerializerInterface
+     */
     private $serializer;
 
+    /**
+     * PhoneController constructor.
+     * @param EntityManagerInterface $em
+     * @param PhoneRepository $repository
+     * @param SerializerInterface $serializer
+     */
     public function __construct(EntityManagerInterface $em, PhoneRepository $repository, SerializerInterface $serializer)
     {
         $this->em = $em;
@@ -95,11 +108,10 @@ class PhoneController extends AbstractFOSRestController
      * @Rest\View(StatusCode=201)
      * @ParamConverter("phone", converter="fos_rest.request_body")
      * @param Phone $phone
-     * @param Request $request
      * @param ConstraintViolationList $violations
      * @return View
      */
-    public function addPhoneAction(Phone $phone, Request $request, ConstraintViolationList $violations)
+    public function addPhoneAction(Phone $phone, ConstraintViolationList $violations)
     {
         if (count($violations)){
             $this->errorsFunction($violations);
