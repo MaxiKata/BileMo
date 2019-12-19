@@ -89,7 +89,7 @@ class PhoneController extends AbstractFOSRestController
 
     /**
      * @Rest\Post(
-     *     path="/phone",
+     *     path="/admin/phone",
      *     name="phone_post"
      * )
      * @Rest\View(StatusCode=201)
@@ -117,7 +117,7 @@ class PhoneController extends AbstractFOSRestController
 
     /**
      * @Rest\Patch(
-     *     path="/phone/{id}",
+     *     path="/admin/phone/{id}",
      *     name="phone_update",
      *     requirements={"id"="\d+"}
      * )
@@ -188,7 +188,7 @@ class PhoneController extends AbstractFOSRestController
 
     /**
      * @Rest\Delete(
-     *     path="/phone/{id}",
+     *     path="/admin/phone/{id}",
      *     name="phone_delete"
      * )
      * @param Phone $phone

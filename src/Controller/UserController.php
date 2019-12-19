@@ -70,7 +70,7 @@ class UserController extends AbstractFOSRestController
     public function getUserAction(User $user, Request $request){
         $token = filter_var($request->headers->get('X-AUTH-TOKEN'), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $result = $this->accessTokenRepository->findOneBy(['token' => $token]);
-        if($result && $result->getClient() === $user->getClient()){
+        if($result && $result->getClient() === $user->getClient() || $result->getUser()->getRoles() == 'ROLE_ADMIN'){
             return $user;
         }
         throw new HttpException(Response::HTTP_FORBIDDEN,'You are not allowed to see this User');
@@ -90,7 +90,7 @@ class UserController extends AbstractFOSRestController
         $token = filter_var($request->headers->get('X-AUTH-TOKEN'), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $result = $this->accessTokenRepository->findOneBy(['token' => $token]);
 
-        if($result && $result->getUser() === $user){
+        if($result && $result->getUser() === $user || $result->getUser()->getRoles() == 'ROLE_ADMIN'){
             $this->em->remove($user);
             $this->em->flush();
             return $this->view('null', Response::HTTP_NO_CONTENT);
@@ -140,7 +140,7 @@ class UserController extends AbstractFOSRestController
     {
         $token = filter_var($request->headers->get('X-AUTH-TOKEN'), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $result = $this->accessTokenRepository->findOneBy(['token' => $token]);
-        if($result && $result->getClient() == $client){
+        if($result && $result->getClient() == $client || $result->getUser()->getRoles() == 'ROLE_ADMIN'){
             $pager = $this->repository->search(
                 $client,
                 $paramFetcher->get('order'),
@@ -157,7 +157,6 @@ class UserController extends AbstractFOSRestController
      *     path="/login",
      *     name="login_user"
      * )
-     *
      * @Rest\View()
      * @param Request $request
      * @return Response
@@ -224,7 +223,7 @@ class UserController extends AbstractFOSRestController
                     'grant_type'    =>  'password',
                     'username'      =>  $data['username'],
                     'password'      =>  $data['password'],
-                    'scope'         =>  'ROLE_USER'
+                    'scope'         =>  'user'
                 ],
                 $request->cookies->all(),
                 $request->files->all(),
@@ -290,7 +289,7 @@ class UserController extends AbstractFOSRestController
         $user->setEmailCanonical($email);
         $user->setEnabled(1);
         $user->setPassword($this->encoder->encodePassword($user, $password));
-        $user->addRole("ROLE_ADMIN");
+        $user->addRole("ROLE_USER");
         $user->setClient($client);
         $this->updateUser($user, $token);
 

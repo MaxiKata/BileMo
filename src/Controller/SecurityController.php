@@ -28,13 +28,15 @@ class SecurityController extends AbstractFOSRestController
 
     /**
      * Create Client.
-     * @Rest\Post("/createClient")
+     * @Rest\Post(path="/admin/createClient", name="create_client")
      *
      * @param Request $request
      * @return Response
      */
     public function AuthenticationAction(Request $request)
     {
+        //echo 'cono2'; exit;
+        //var_dump($request->getContent()); exit;
         $data = json_decode($request->getContent(), true);
         if (empty($data['redirect-uri']) || empty($data['grant-type']) || empty($data['name'])) {
             $message = "Some datas are missing : redirect-uri or grant-type or name. Your data are:<br>" . json_encode($data);
@@ -55,7 +57,7 @@ class SecurityController extends AbstractFOSRestController
     /**
      * Delete Client
      * @Rest\Delete(
-     *     path="/deleteClient",
+     *     path="/admin/deleteClient",
      *     name="delete_client"
      * )
      * @param Request $request

@@ -37,7 +37,6 @@ security:
             anonymous: true
 
     access_control:
-        - { path: ^/api, roles: [ IS_AUTHENTICATED_FULLY ] }
-        - { path: ^/createClient, roles: [ IS_AUTHENTICATED_ANONYMOUSLY ] }
-        - { path: ^/deleteClient, roles: [ IS_AUTHENTICATED_ANONYMOUSLY ] }
+        - { path: ^/api/admin, roles: [ ROLE_ADMIN ] }
+        - { path: ^/api, roles: [ ROLE_USER ] }
         - { path: ^/login, roles: [ IS_AUTHENTICATED_ANONYMOUSLY ] }
