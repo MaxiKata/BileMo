@@ -24,8 +24,13 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
+/**
+ * Class UserController
+ * @package App\Controller
+ */
 class UserController extends AbstractFOSRestController
 {
+
     private $em;
     private $repository;
     private $encoder;
@@ -35,6 +40,17 @@ class UserController extends AbstractFOSRestController
     private $accessTokenRepository;
     private $refreshTokenRepository;
 
+    /**
+     * UserController constructor.
+     * @param EntityManagerInterface $em
+     * @param UserRepository $repository
+     * @param UserPasswordEncoderInterface $encoder
+     * @param ClientRepository $clientRepository
+     * @param TokenController $tokenController
+     * @param ClientManagerInterface $clientManager
+     * @param AccessTokenRepository $accessTokenRepository
+     * @param RefreshTokenRepository $refreshTokenRepository
+     */
     public function __construct(
         EntityManagerInterface $em,
         UserRepository $repository,
@@ -196,23 +212,10 @@ class UserController extends AbstractFOSRestController
 
         if($result){
             if(is_string($result)){
-                $accessToken = $this->accessTokenRepository->findOneBy(['token' => $result]);
-                $refreshToken = $this->refreshTokenRepository->findOneBy([
-                    'id' => $accessToken->getId(),
-                    'user' => $accessToken->getUser()
-                ]);
-                if ($accessToken->getExpiresAt() >= time()){
-                    return new JsonResponse([
-                        'access_token'  =>  $accessToken->getToken(),
-                        'expires_in'    =>  $accessToken->getExpiresIn(),
-                        'token_type'    =>  'bearer',
-                        'scope'         =>  $accessToken->getScope(),
-                        'refresh_token' =>  $refreshToken->getToken()
-                    ]);
+                $result = $this->clearToken($result);
+                if($result){
+                    return $result;
                 }
-                $this->em->remove($accessToken);
-                $this->em->remove($refreshToken);
-                $this->em->flush();
             }
             $request = Request::create(
                 json_encode($request->query->all()),
@@ -241,9 +244,9 @@ class UserController extends AbstractFOSRestController
                 $token
             );
             return $view;
-        }else{
-            throw new HttpException(Response::HTTP_BAD_REQUEST,'User already exits or password is wrong');
         }
+
+        throw new HttpException(Response::HTTP_BAD_REQUEST,'User already exits or password is wrong');
     }
 
     /**
@@ -296,6 +299,10 @@ class UserController extends AbstractFOSRestController
         return true;
     }
 
+    /**
+     * @param $view
+     * @return mixed
+     */
     private function updateToken($view)
     {
         $finalArray= [];
@@ -311,10 +318,40 @@ class UserController extends AbstractFOSRestController
         return $finalArray['access_token'];
     }
 
+    /**
+     * @param User $user
+     * @param $token
+     */
     private function updateUser(User $user, $token)
     {
         $user->setConfirmationToken($token);
         $this->em->persist($user);
         $this->em->flush();
+    }
+
+    /**
+     * @param $result
+     * @return JsonResponse
+     */
+    private function clearToken($result)
+    {
+        $accessToken = $this->accessTokenRepository->findOneBy(['token' => $result]);
+        $refreshToken = $this->refreshTokenRepository->findOneBy([
+            'id' => $accessToken->getId(),
+            'user' => $accessToken->getUser()
+        ]);
+        if ($accessToken->getExpiresAt() >= time()){
+            return new JsonResponse([
+                'access_token'  =>  $accessToken->getToken(),
+                'expires_in'    =>  $accessToken->getExpiresIn(),
+                'token_type'    =>  'bearer',
+                'scope'         =>  $accessToken->getScope(),
+                'refresh_token' =>  $refreshToken->getToken()
+            ]);
+        }
+        $this->em->remove($accessToken);
+        $this->em->remove($refreshToken);
+        $this->em->flush();
+        return false;
     }
 }

@@ -69,7 +69,6 @@ class UserRepository extends AbstractRepository implements PasswordUpgraderInter
         /* check if result have been found */
         if(empty($paginate->getNbResults())){
             $message = 'There is no Phone founded';
-            $code = 204;
             throw new HttpException(Response::HTTP_NO_CONTENT, $message);
         }
 
