@@ -28,7 +28,7 @@ class SecurityController extends AbstractFOSRestController
 
     /**
      * Create Client.
-     * @Rest\Post("/createClient")
+     * @Rest\Post(path="/admin/createClient", name="create_client")
      *
      * @param Request $request
      * @return Response
@@ -55,7 +55,7 @@ class SecurityController extends AbstractFOSRestController
     /**
      * Delete Client
      * @Rest\Delete(
-     *     path="/deleteClient",
+     *     path="/admin/deleteClient",
      *     name="delete_client"
      * )
      * @param Request $request
