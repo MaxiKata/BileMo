@@ -32,26 +32,26 @@ Project made with Symfony 4.4.
 -   FOS\OAuthServerBundle\Model\Client with: 
 
 ```
-    /**
-    * @ORM\Column(type="string")
-    * @Serializer\Expose()
-    * @var string
-    */
-    protected $name;
+/**
+* @ORM\Column(type="string")
+* @Serializer\Expose()
+* @var string
+*/
+protected $name;
 ```
 
 -   FOS\OAuthServerBundle\Model\ClientInterface with:
 
 ```
-    /**
-    * @param string $name
-    */
-    public function setName(string $name);
+/**
+* @param string $name
+*/
+public function setName(string $name);
     
-    /**
-    * @return string
-    */
-    public function getName();
+/**
+* @return string
+*/
+public function getName();
 ```
 
 ### 2 - Manage property access
@@ -61,17 +61,16 @@ Project made with Symfony 4.4.
 -   Comment the entity with (this will hide and protect all properties):
 
 ```
-    /**
-    * @Serializer\ExclusionPolicy("all")
-    */
+/**
+* @Serializer\ExclusionPolicy("all")
+*/
 ```
 
 -   Comment the property you wish to show with:
-
-```
-    /**
-    * @Serializer\Expose()
-    */
+```alpha
+/**
+* @Serializer\Expose()
+*/
 ```
 
 ## Usage - Url
@@ -90,7 +89,7 @@ Once logged in, the API will send back a token that you will be required for eve
 The address that user can check are:
 
 | URL | Entity | Call Method | Description |
-| --- | ------ | ----------- | ----------- |
+| -------------- | ------ | ----------- | --------------------------- |
 | api/user/{id} | User | GET | Get a user profile |
 | api/user/{id} | User | DELETE | Delete a user profile |
 | api/users/{id} | User | GET | Get users lists of a client |
@@ -100,7 +99,7 @@ The address that user can check are:
 The address that admin can check are:
 
 | URL | Entity | Call Method | Description |
-| --- | ------ | ----------- | ----------- |
+| ---------------------- | ------ | ----------- | ------------------- |
 | api/admin/createClient | Client | POST | Create a new Client |
 | api/admin/deleteClient | Client | DELETE | Delete a Client |
 | api/admin/phone | Phone | POST | Add a new Phone |
