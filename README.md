@@ -42,7 +42,7 @@ protected $name;
 
 -   FOS\OAuthServerBundle\Model\ClientInterface with:
 
-```
+```alpha
 /**
 * @param string $name
 */
@@ -59,8 +59,7 @@ public function getName();
 **=>** You might wish to hide some params from being shown to user or client when they call a user or users list. In this case, you can add:
 
 -   Comment the entity with (this will hide and protect all properties):
-
-```
+```alpha
 /**
 * @Serializer\ExclusionPolicy("all")
 */
@@ -88,13 +87,13 @@ Once logged in, the API will send back a token that you will be required for eve
 
 The address that user can check are:
 
-| URL | Entity | Call Method | Description |
+| URL            | Entity | Call Method | Description                 |
 | -------------- | ------ | ----------- | --------------------------- |
-| api/user/{id} | User | GET | Get a user profile |
-| api/user/{id} | User | DELETE | Delete a user profile |
-| api/users/{id} | User | GET | Get users lists of a client |
-| api/phone/{id} | Phone | GET | Get a phone description |
-| api/phones | Phone | GET | Get the list of phones |
+| api/user/{id}  | User   | GET         | Get a user profile          |
+| api/user/{id}  | User   | DELETE      | Delete a user profile       |
+| api/users/{id} | User   | GET         | Get users lists of a client |
+| api/phone/{id} | Phone  | GET         | Get a phone description     |
+| api/phones     | Phone  | GET         | Get the list of phones      |
 
 The address that admin can check are:
 
