@@ -31,7 +31,7 @@ Project made with Symfony 4.4.
 
 -   FOS\OAuthServerBundle\Model\Client with: 
 
-```
+```alpha
 /**
 * @ORM\Column(type="string")
 * @Serializer\Expose()
@@ -97,13 +97,13 @@ The address that user can check are:
 
 The address that admin can check are:
 
-| URL | Entity | Call Method | Description |
+| URL                    | Entity | Call Method | Description         |
 | ---------------------- | ------ | ----------- | ------------------- |
-| api/admin/createClient | Client | POST | Create a new Client |
-| api/admin/deleteClient | Client | DELETE | Delete a Client |
-| api/admin/phone | Phone | POST | Add a new Phone |
-| api/admin/phone/{id} | Phone | PATCH | Update a Phone |
-| api/admin/phone/{id} | Phone | DELETE | Delete a Phone |
+| api/admin/createClient | Client | POST        | Create a new Client |
+| api/admin/deleteClient | Client | DELETE      | Delete a Client     |
+| api/admin/phone        | Phone  | POST        | Add a new Phone     |
+| api/admin/phone/{id}   | Phone  | PATCH       | Update a Phone      |
+| api/admin/phone/{id}   | Phone  | DELETE      | Delete a Phone      |
 
 ## License
 
