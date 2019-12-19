@@ -89,23 +89,23 @@ Once logged in, the API will send back a token that you will be required for eve
 
 The address that user can check are:
 
-URL | Entity | Call Method | Description |
---- | ------ | ----------- | ----------- |
-api/user/{id} | User | GET | Get a user profile |
-api/user/{id} | User | DELETE | Delete a user profile |
-api/users/{id} | User | GET | Get users lists of a client |
-api/phone/{id} | Phone | GET | Get a phone description |
-api/phones | Phone | GET | Get the list of phones |
+| URL | Entity | Call Method | Description |
+| --- | ------ | ----------- | ----------- |
+| api/user/{id} | User | GET | Get a user profile |
+| api/user/{id} | User | DELETE | Delete a user profile |
+| api/users/{id} | User | GET | Get users lists of a client |
+| api/phone/{id} | Phone | GET | Get a phone description |
+| api/phones | Phone | GET | Get the list of phones |
 
 The address that admin can check are:
 
-URL | Entity | Call Method | Description |
---- | ------ | ----------- | ----------- |
-api/admin/createClient | Client | POST | Create a new Client |
-api/admin/deleteClient | Client | DELETE | Delete a Client |
-api/admin/phone | Phone | POST | Add a new Phone |
-api/admin/phone/{id} | Phone | PATCH | Update a Phone |
-api/admin/phone/{id} | Phone | DELETE | Delete a Phone |
+| URL | Entity | Call Method | Description |
+| --- | ------ | ----------- | ----------- |
+| api/admin/createClient | Client | POST | Create a new Client |
+| api/admin/deleteClient | Client | DELETE | Delete a Client |
+| api/admin/phone | Phone | POST | Add a new Phone |
+| api/admin/phone/{id} | Phone | PATCH | Update a Phone |
+| api/admin/phone/{id} | Phone | DELETE | Delete a Phone |
 
 ## License
 
