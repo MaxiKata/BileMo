@@ -29,7 +29,7 @@ Project made with Symfony 4.4.
 
 **=>** A property "name" has been added on the basic settings for the Client Entity. You might need to add it to few files in composer such as:
 
-- FOS\OAuthServerBundle\Model\Client with: 
+-  FOS\OAuthServerBundle\Model\Client with: 
 
 ```
     /**
@@ -40,7 +40,7 @@ Project made with Symfony 4.4.
     protected $name;
 ```
 
-- FOS\OAuthServerBundle\Model\ClientInterface with:
+-  FOS\OAuthServerBundle\Model\ClientInterface with:
 
 ```
     /**
@@ -58,7 +58,7 @@ Project made with Symfony 4.4.
 
 **=>** You might wish to hide some params from being shown to user or client when they call a user or users list. In this case, you can add:
 
-- Comment the entity with (this will hide and protect all properties):
+-  Comment the entity with (this will hide and protect all properties):
 
 ```
     /**
@@ -66,46 +66,46 @@ Project made with Symfony 4.4.
     */
 ```
 
-- Comment the property you wish to show with:
+-  Comment the property you wish to show with:
 
 ```
     /**
     * @Serializer\Expose()
     */
 ```
-    
+
 ## Usage - Url
     
 You can easily manage the authorization in config/packages/security.yaml and set *IS_AUTHENTICATED_ANONYMOUSLY* as roles in "access_control" to ensure your first adding client.
 
-__We strongly recommend to put back the basic settings once 1st Client will be created__
+**We strongly recommend to put back the basic settings once 1st Client will be created**
     
-- To add a new Client call: *api/admin/createClient*
-- To connect as user: *api/login*
+-  To add a new Client call: *api/admin/createClient*
+-  To connect as user: *api/login*
 
 Once logged in, the API will send back a token that you will be required for every connection and should be sent in headers as:
-- key = ```X-AUTH-TOKEN```
-- Value = *User token*
+-  Key = ```X-AUTH-TOKEN```
+-  Value = *User token*
 
 The address that user can check are:
 
-URL | Entity | Call Method | Description
---- | ------ | ----------- | -----------
-api/user/{id} | User | GET | Get a user profile
-api/user/{id} | User | DELETE | Delete a user profile
-api/users/{id} | User | GET | Get users lists of a client
-api/phone/{id} | Phone | GET | Get a phone description
-api/phones | Phone | GET | Get the list of phones
+URL | Entity | Call Method | Description |
+--- | ------ | ----------- | ----------- |
+api/user/{id} | User | GET | Get a user profile |
+api/user/{id} | User | DELETE | Delete a user profile |
+api/users/{id} | User | GET | Get users lists of a client |
+api/phone/{id} | Phone | GET | Get a phone description |
+api/phones | Phone | GET | Get the list of phones |
 
 The address that admin can check are:
 
-URL | Entity | Call Method | Description
---- | ------ | ----------- | -----------
-api/admin/createClient | Client | POST | Create a new Client
-api/admin/deleteClient | Client | DELETE | Delete a Client
-api/admin/phone | Phone | POST | Add a new Phone
-api/admin/phone/{id} | Phone | PATCH | Update a Phone
-api/admin/phone/{id} | Phone | DELETE | Delete a Phone
+URL | Entity | Call Method | Description |
+--- | ------ | ----------- | ----------- |
+api/admin/createClient | Client | POST | Create a new Client |
+api/admin/deleteClient | Client | DELETE | Delete a Client |
+api/admin/phone | Phone | POST | Add a new Phone |
+api/admin/phone/{id} | Phone | PATCH | Update a Phone |
+api/admin/phone/{id} | Phone | DELETE | Delete a Phone |
 
 ## License
 
