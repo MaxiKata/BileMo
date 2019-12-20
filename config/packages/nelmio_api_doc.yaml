@@ -1,9 +1,20 @@
 nelmio_api_doc:
     documentation:
+        host: 127.0.0.1:8000
+        schemes: [http, https]
         info:
-            title: My App
-            description: This is an awesome app!
+            title: API BileMo
+            description: BileMo is a webstore for phones multi-brand! And this is the API that will be use to connect our clients who wants to offer our product to their customers.
             version: 1.0.0
+        securityDefinitions:
+            Bearer:
+                type: apiKey
+                description: 'Value: Bearer {OAuth2}'
+                name: X-AUTH-TOKEN
+                in: header
+        security:
+            - Bearer: []
     areas: # to filter documented areas
         path_patterns:
-            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
+            - ^/api(?!/doc)(?!/admin) # Accepts routes under /api except /api/doc, /api/admin
+

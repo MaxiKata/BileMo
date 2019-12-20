@@ -23,6 +23,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
+use Swagger\Annotations as SWG;
 
 /**
  * Class UserController
@@ -79,6 +82,25 @@ class UserController extends AbstractFOSRestController
      *     requirements={"id"="\d+"}
      * )
      * @Rest\View()
+     * @SWG\Response(
+     *     response=200,
+     *     description="Showing User profile from the same Client",
+     *     @SWG\Schema(
+     *          @SWG\Items(ref=@Model(type=User::class))
+     *     )
+     * )
+     * @SWG\Response(
+     *     response=403,
+     *     description="You are trying to access to a User with a different Client which is not the same as the user - So no credentials",
+     * )
+     * @SWG\Parameter(
+     *     name="id",
+     *     in="path",
+     *     type="integer",
+     *     description="The ID of the User"
+     * )
+     * @SWG\Tag(name="User")
+     * @Security(name="Bearer")
      * @param User $user
      * @param Request $request
      * @return User
@@ -98,6 +120,22 @@ class UserController extends AbstractFOSRestController
      *     name="delete_user",
      *     requirements={"id"="\d+"}
      * )
+     * @SWG\Response(
+     *     response=204,
+     *     description="Profile of the User has been well deleted"
+     * )
+     * @SWG\Response(
+     *     response=403,
+     *     description="User can only delete is own profile - So no credentials",
+     * )
+     * @SWG\Parameter(
+     *     name="id",
+     *     in="path",
+     *     type="integer",
+     *     description="The ID of the User"
+     * )
+     * @SWG\Tag(name="User")
+     * @Security(name="Bearer")
      * @param User $user
      * @param Request $request
      * @return View
@@ -120,7 +158,6 @@ class UserController extends AbstractFOSRestController
      *     name="users_list",
      *     requirements={"id"="\d+"}
      * )
-     *
      * @Rest\QueryParam(
      *     name="keyword",
      *     requirements="[a-zA-Z0-9]",
@@ -138,7 +175,7 @@ class UserController extends AbstractFOSRestController
      *     name="limit",
      *     requirements="\d+",
      *     default="15",
-     *     description="Max number of movies per page."
+     *     description="Max number of users per page."
      * )
      * @Rest\QueryParam(
      *     name="offset",
@@ -147,6 +184,25 @@ class UserController extends AbstractFOSRestController
      *     description="The pagination offset"
      * )
      * @Rest\View()
+     * @SWG\Response(
+     *     response=200,
+     *     description="The list of all the Users of the same Client",
+     *     @SWG\Schema(
+     *          @SWG\Items(ref=@Model(type=Users::class))
+     *     )
+     * )
+     * @SWG\Response(
+     *     response=403,
+     *     description="You are trying to access to a Client which is not the same as the User - So you dont have the credentials",
+     * )
+     * @SWG\Parameter(
+     *     name="id",
+     *     in="path",
+     *     type="integer",
+     *     description="The ID of the Client"
+     * )
+     * @SWG\Tag(name="User")
+     * @Security(name="Bearer")
      * @param Client $client
      * @param Request $request
      * @param ParamFetcherInterface $paramFetcher
@@ -174,6 +230,100 @@ class UserController extends AbstractFOSRestController
      *     name="login_user"
      * )
      * @Rest\View()
+     * @SWG\Parameter(
+     *     name="username",
+     *     in="body",
+     *     type="string",
+     *     description="Username of the User",
+     *     required=true,
+     *     @SWG\Schema(
+     *          @SWG\Property(property="username", type="string")
+     *     )
+     * )
+     * @SWG\Parameter(
+     *     name="email",
+     *     in="body",
+     *     type="string",
+     *     description="Email of the User",
+     *     required=true,
+     *     @SWG\Schema(
+     *          @SWG\Property(property="email", type="string")
+     *     )
+     * )
+     * @SWG\Parameter(
+     *     name="password",
+     *     in="body",
+     *     type="string",
+     *     description="Password of the User",
+     *     required=true,
+     *     @SWG\Schema(
+     *          @SWG\Property(property="password", type="string")
+     *     )
+     * )
+     * @SWG\Parameter(
+     *     name="client_id",
+     *     in="body",
+     *     type="string",
+     *     description="Client Id of the User",
+     *     required=true,
+     *     @SWG\Schema(
+     *          @SWG\Property(property="client_id", type="string")
+     *     )
+     * )
+     * @SWG\Parameter(
+     *     name="client_secret",
+     *     in="body",
+     *     type="string",
+     *     description="Client Secret of the User",
+     *     required=true,
+     *     @SWG\Schema(
+     *          @SWG\Property(property="client_secret", type="string")
+     *     )
+     * )
+     * @SWG\Parameter(
+     *     name="clientName",
+     *     in="body",
+     *     type="string",
+     *     description="Client Name of the User",
+     *     @SWG\Schema(
+     *          @SWG\Property(property="clientName", type="string")
+     *     )
+     * )
+     * @SWG\Response(
+     *     response=200,
+     *     description="Send back the token that has been created to connect on BileMo website",
+     *     @SWG\Schema(
+     *          @SWG\Property(
+     *              property="access_token",
+     *              type="string"
+     *          ),
+     *          @SWG\Property(
+     *              property="expires_in",
+     *              type="integer"
+     *          ),
+     *          @SWG\Property(
+     *              property="token_type",
+     *              type="string"
+     *          ),
+     *          @SWG\Property(
+     *              property="scope",
+     *              type="string"
+     *          ),
+     *          @SWG\Property(
+     *              property="refresh_token",
+     *              type="string"
+     *          )
+     *     )
+     * )
+     * @SWG\Response(
+     *     response=400,
+     *     description="User already exits or password is wrong - Bad request",
+     * )
+     * @SWG\Response(
+     *     response=422,
+     *     description="Missing fields or empty",
+     * )
+     * @SWG\Tag(name="User")
      * @param Request $request
      * @return Response
      */

@@ -116,5 +116,5 @@ The address that admin can check are:
 
 ![Conditions](https://img.shields.io/badge/Conditions-License_and_copyright_notice-blue.svg)
 
-![Limitations](https://img.shields.io/badge/Conditions-Liability-red.svg)
-![Limitations](https://img.shields.io/badge/Conditions-Warranty-red.svg)
+![Limitations](https://img.shields.io/badge/Limitations-Liability-red.svg)
+![Limitations](https://img.shields.io/badge/Limitations-Warranty-red.svg)

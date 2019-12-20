@@ -18,6 +18,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\ConstraintViolationList;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
+use Swagger\Annotations as SWG;
 
 /**
  * Class PhoneController
@@ -74,7 +77,7 @@ class PhoneController extends AbstractFOSRestController
      *     name="limit",
      *     requirements="\d+",
      *     default="15",
-     *     description="Max number of movies per page."
+     *     description="Max number of phones per page."
      * )
      * @Rest\QueryParam(
      *     name="offset",
@@ -82,6 +85,19 @@ class PhoneController extends AbstractFOSRestController
      *     default="1",
      *     description="The pagination offset"
      * )
+     * @SWG\Response(
+     *     response=200,
+     *     description="The list of all the Phones proposed by BileMo",
+     *     @SWG\Schema(
+     *          @SWG\Items(ref=@Model(type=Phones::class))
+     *     )
+     * )
+     * @SWG\Response(
+     *     response=204,
+     *     description="The list of all the Phones is empty"
+     * )
+     * @SWG\Tag(name="Phone")
+     * @Security(name="Bearer")
      * @Rest\View()
      * @param ParamFetcherInterface $paramFetcher
      * @return Phones | View
@@ -176,6 +192,23 @@ class PhoneController extends AbstractFOSRestController
      * @Rest\View()
      * @param Phone $phone
      * @return Phone
+     * @SWG\Response(
+     *     response=200,
+     *     description="The detail of 1 phone",
+     *     @Model(type=Phone::class)
+     * )
+     * @SWG\Response(
+     *     response=404,
+     *     description="Page not found"
+     * )
+     * @SWG\Parameter(
+     *     name="id",
+     *     in="path",
+     *     type="integer",
+     *     description="The ID of the phone"
+     * )
+     * @SWG\Tag(name="Phone")
+     * @Security(name="Bearer")
      */
     public function showPhoneAction(Phone $phone)
     {
