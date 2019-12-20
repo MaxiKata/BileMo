@@ -317,7 +317,7 @@ class UserController extends AbstractFOSRestController
      * )
      * @SWG\Response(
      *     response=400,
-     *     description="User already exits or password is wrong - Bad request",
+     *     description="Bad request - Authentification is incorrect",
      * )
      * @SWG\Response(
      *     response=422,
@@ -350,6 +350,9 @@ class UserController extends AbstractFOSRestController
             }
         }elseif($data['clientName']){
             $client = $this->clientRepository->findOneBy(['name' => $data['clientName']]);
+            if(empty($client)){
+                throw new HttpException(Response::HTTP_BAD_REQUEST, 'Client identification incorrect');
+            }
         }
 
         $result = $this->register(
