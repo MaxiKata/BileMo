@@ -4,7 +4,17 @@ namespace App\Entity;
 use JMS\Serializer\Annotation as Serializer;
 use FOS\UserBundle\Model\User as BaseUser;
 use Doctrine\ORM\Mapping as ORM;
+use Hateoas\Configuration\Annotation as Hateoas;
+
 /**
+ * @Hateoas\Relation(
+ *     "self",
+ *      href = @Hateoas\Route(
+ *          "get_user",
+ *          parameters = { "id" = "expr(object.getId())" },
+ *          absolute = true
+ *      )
+ * )
  * @ORM\Entity
  * @ORM\Table(name="fos_user")
  */

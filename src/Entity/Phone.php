@@ -10,8 +10,12 @@ use Hateoas\Configuration\Annotation as Hateoas;
 
 /**
  * @Hateoas\Relation(
- *     "authenticated_user",
- *     embedded = @Hateoas\Embedded("expr(service('security.token_storage').getToken().getUser())")
+ *     "self",
+ *      href = @Hateoas\Route(
+ *          "phone_get",
+ *          parameters = { "id" = "expr(object.getId())" },
+ *          absolute = true
+ *      )
  * )
  * @ORM\Entity(repositoryClass="App\Repository\PhoneRepository")
  *

@@ -21,6 +21,9 @@ security:
                 check_path: /oauth/v2/auth_login_check
                 login_path: /oauth/v2/auth_login
                 use_referer: true
+        api_doc:
+            pattern: ^/api/doc
+            security: false
         api:
             pattern:    ^/api
             fos_oauth:  true
