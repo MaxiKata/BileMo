@@ -3,12 +3,19 @@
 
 namespace App\EventListener;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 class ExceptionListener
 {
+    private $logger;
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
     public function onKernelException(ExceptionEvent $event)
     {
 
@@ -21,11 +28,14 @@ class ExceptionListener
         }else{
             $code = $exception->getCode();
         }
+
         $message = sprintf(
             "My Error says: \"%s\" with code: %s",
             $exception->getMessage(),
             $code
         );
+        //log error
+        $this->logger->error($message);
         // Customize your response object to display the exception details
         $response = new Response();
         $response->setContent($message);
