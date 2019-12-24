@@ -118,3 +118,7 @@ The address that admin can check are:
 
 ![Limitations](https://img.shields.io/badge/Limitations-Liability-red.svg)
 ![Limitations](https://img.shields.io/badge/Limitations-Warranty-red.svg)
+
+## Documentations
+
+Link to documentation is accessible to **https://yourdomain.com/api/doc**
