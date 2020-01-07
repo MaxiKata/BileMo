@@ -144,7 +144,7 @@ class UserController extends AbstractFOSRestController
         $token = filter_var($request->headers->get('X-AUTH-TOKEN'), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         $result = $this->accessTokenRepository->findOneBy(['token' => $token]);
 
-        if($result && $result->getUser() === $user || $result->getUser()->getRoles() == 'ROLE_ADMIN'){
+        if($result && $result->getUser() === $user || $result->getUser()->getRoles()[0] == 'ROLE_ADMIN'){
             $this->em->remove($user);
             $this->em->flush();
             return $this->view('null', Response::HTTP_NO_CONTENT);
